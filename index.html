@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riemann Sum Visualizer</title>
+  <link rel="icon" href="SIgma1.png" />
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Include MathJAX -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+
+  <!-- Graphing library -->
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://unpkg.com/function-plot/dist/function-plot.js"></script>
+
+  <!-- Old Standard TT Imports -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT&display=swap" rel="stylesheet">
+
+  <!-- Compute Modern import -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/aaaakshat/cm-web-fonts@latest/fonts.css">
+
+  <!-- MATH.JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.2.1/math.js"
+    integrity="sha512-ekTDuSaAE9sFxbDUSIgOT0OK+iInxoziYIA03oVHFWC7edmuSwngpR/FTu7ome+sfcZgFePphvGDkRTav62lMQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+</head>
+
+<body>
+  <script src="script.js"></script>
+  <div class="content">
+    <h1 id="pageTitle">Riemann Sum Visualizer</h1>
+    <p id="descOne">Plots a right Riemann sum for a variety of functions and displays the corresponding notation.</p>
+
+    <div id="functionDesc">Function Type</div>
+    <form>
+      <input class="functions" type="radio" id="linear" name="functionType" value="linear"
+        onclick="updateParameters('linear'); conditionalVisualize()" checked>
+      <label for="linear" class="functionLabel">Linear</label>
+      <input class="functions" type="radio" id="poly" name="functionType" value="poly"
+        onclick="updateParameters('poly'); conditionalVisualize()">
+      <label for="poly" class="functionLabel">Polynomial</label>
+      <input class="functions" type="radio" id="exp" name="functionType" value="exp"
+        onclick="updateParameters('exp'); conditionalVisualize()">
+      <label for="exp" class="functionLabel">Exponential</label>
+      <input class="functions" type="radio" id="log" name="functionType" value="log"
+        onclick="updateParameters('log'); conditionalVisualize()">
+      <label for="log" class="functionLabel">Logarithmic</label>
+      <input class="functions" type="radio" id="trig" name="functionType" value="trig"
+        onclick="updateParameters('trig'); conditionalVisualize()">
+      <label for="trig" class="functionLabel">Trigonometric</label>
+    </form>
+
+  </div>
+
+  <div id="content2">
+    <h1 id="graphTitle">$$f(x) = x+1$$</h1>
+    <br>
+    <div id="widthMarker" style="height: 1px; width: 65%; visibility: hidden; opacity: 0; margin: 0px;"></div>
+    <div id="plot"></div>
+  </div>
+  <div class="content">
+    <div id="equation"></div>
+
+    <div id="currentFunction" style="display: none;">x + 1</div>
+
+    <!-- Start Value -->
+    <div id="startValues">
+
+      <div id="startLabel" class="slideNumLabels">Start Value \((x=a)\)</div>
+
+      <div class="slideContainer">
+
+        <input type="range" class="slider" min="-3" max="5" value="0" step="0.01" id="startSlideInput"
+          oninput="updateNumberField('startInput', this.value); conditionalVisualize()">
+
+        <input type="number" id="startInput" value="0"
+          oninput="updateSlider('startSlideInput', this.value); conditionalVisualize()">
+
+      </div>
+
+    </div>
+
+    <!-- End Value -->
+    <div id="endValues">
+
+      <div class="slideNumLabels">End Value \((x=b)\)</div>
+
+      <div class="slideContainer">
+
+        <input type="range" class="slider" min="-3" max="5" value="2" step="0.01" id="endSlideInput"
+          oninput="updateNumberField('endInput', this.value); conditionalVisualize()">
+
+        <input type="number" id="endInput" value="2"
+          oninput="updateSlider('endSlideInput', this.value); conditionalVisualize()">
+
+      </div>
+
+    </div>
+
+    <!-- Number of Rectangles -->
+    <div>
+      <div class="slideNumLabels">Number of Rectangles \((n)\)<div class="tooltip">i<span class="tooltiptext">Choose
+            \(n=0\) for the definite integral.<br><br>Note that for certain functions and small, positive values of
+            \(n\) \((n<10)\), the Riemann sum may be slightly inaccurate in that it may 'bleed' over the x-axis. The
+              calculations at the bottom are still accurate however. </span>
+        </div>
+      </div>
+
+      <div class="slideContainer">
+
+        <input type="range" class="slider" min="0" max="100" value="10" id="rectanglesInput"
+          oninput="updateNumberField('rectanglesNumInput', this.value); conditionalVisualize()">
+
+        <input type="number" min="0" max="1000" value="10" step="1" id="rectanglesNumInput"
+          oninput="updateSlider('rectanglesInput', this.value); conditionalVisualize()">
+
+      </div>
+
+    </div>
+    <button class="oneclick" onclick="visualize()">Visualize</button>
+    <hr size="7" color="#f2ede4">
+    <button type="button" class="collapsible">Derivations for the Curious</button>
+    <div id="readMore" style="font-size: 18px; color: black;">
+      <p>
+        Finding the area under the curve using these Riemann sums involves essentially just summing the areas of all of the little rectangles underneath the curve. Informally, this looks like:
+      $$\sum \, (\textrm{length of rectangle})(\textrm{width of rectangle})$$
+        (The \(\Sigma\) just means that we are summing together the areas of all of the rectangles, instead of just one.)<br><br>
+        To make this a little more formal, we may write:
+        $$\sum \, (f(x_{i}))(\Delta x)$$
+Here, \(x_{i}\) is the x-value of the right edge of a rectangle, and \(f(x_{i})\) represents the height of this rectangle under the graph. The \(\Delta x\) is the width of this rectangle, which we will keep constant for the purposes of this derivation.<br><br>
+        Still, this notation is incomplete. We need to include the \(a\), \(b\), and \(n\) values in the sum. We can represent the width of each rectangle by the fraction:
+        $$\textrm{width of rectangle}=\Delta x=\frac{\textrm{length of interval}}{\textrm{number of rectangles}}=\frac{b-a}{n}$$
+        Think: Let's say we have an interval that is 20 units long, (\(b-a=20\)) and we have 10 rectangles (\(n=10\)) in that interval. It makes sense that the width of each rectangle (given equal widths for each rectangle) must be 2 units.<br><br>
+        The height of each rectangle is a little bit more complicated. We know that the height of the first rectangle on the graph is \(f(a+\textrm{width})\) or \(f(a+\frac{b-a}{n})\). Why? Because this is a right Riemann sum, the height is given by the function at the right edge of the rectangle. Evaluating just at \(f(a)\) would give us the left edge, so we add by the width of one rectangle to move over to the right edge.<br><br>
+        We therefore naturally expect the height of the second rectangle to be \(f(a+2\cdot\textrm{width})\), or \(f(a+2\cdot\frac{b-a}{n})\). We may generalize this pattern, and state that the height of the \(k\)-th rectangle is: 
+        $$f(a+k\cdot\frac{b-a}{n})$$
+         You may think of the function argument (the expression inside of the function parentheses) as a little pointer under the graph. At \(x=a\), the pointer sits right under the left edge of the first rectangle. At \(x=a+\frac{b-a}{n}\), it sits under the right edge of the first rectangle. At \(x=a+5\cdot\frac{b-a}{n}\), it sits under the right edge of the <span style="font-weight: bold;">fifth</span> rectangle. <br><br>
+        Putting what we have together, we arrive at
+        $$\sum \Bigl(f\,\Bigl(a+k\cdot\frac{b-a}{n}\Bigr)\Bigr)\Bigl(\frac{b-a}{n}\Bigr)$$
+        We're almost done, we just need to add a few finishing details. To make this notation fully complete, we need to add upper and lower summation bounds to the sum. Doing this, we finally arrive at:
+        $$\textrm{Area under the curve} \approx \sum_{k=1}^{n} \Bigl(f\,\Bigl(a+k\cdot\frac{b-a}{n}\Bigr)\Bigr)\Bigl(\frac{b-a}{n}\Bigr)$$
+        These bounds essentially tell us that we are summing through different values of \(k\), starting at 1 and ending at \(n\). Once \(k\) reaches \(n\), we have reached the last rectangle and the sum is complete. To investigate further, we can expand out the formula we've just created.
+        <br><br>
+        Let's consider a sum with 3 rectangles (\(n=3\)). In our formula, this would look like:
+        $$S=\sum_{k=1}^{3} \Bigl(f\,\Bigl(a+k\cdot\frac{b-a}{3}\Bigr)\Bigr)\Bigl(\frac{b-a}{3}\Bigr)$$
+        We can rewrite this sum by expanding it out:<span></span>
+        $$S=\Bigl(f\,\Bigl(a+1\cdot\frac{b-a}{3}\Bigr)\Bigr)\Bigl(\frac{b-a}{3}\Bigr)+\Bigl(f\,\Bigl(a+2\cdot\frac{b-a}{3}\Bigr)\Bigr)\Bigl(\frac{b-a}{3}\Bigr)+\Bigl(f\,\Bigl(a+3\cdot\frac{b-a}{3}\Bigr)\Bigr)\Bigl(\frac{b-a}{3}\Bigr)$$
+        Notice how the value \(k\) had been replaced with 1, 2, and 3. It ends at 3 because we only have 3 rectangles, as stated in our initial condition, \(n=3\). If we had 74 rectangles, we would've had a sum with 74 terms, and 74 different values for \(k\). The \(\Sigma\) is therefore a powerful notational tool for condensing these very large sums. <br><br>
+        From here we can formally define the Riemannian integral by taking the limit of the sum as \(n\to\infty\):
+        $$\textrm{Area under the curve} = \lim_{n\to\infty} \sum_{k=1}^{n} \Bigl(f\,\Bigl(a+k\cdot\frac{b-a}{n}\Bigr)\Bigr)\Bigl(\frac{b-a}{n}\Bigr)=\int_{a}^{b} f(x)\,dx$$
+        Fundamentally, nothing has changed here. Now, instead of taking some finite number of rectangles, we imagine an "infinite" number of "infinitely" thin rectangles assembling themselves underneath the curve. In terms of the notation, \(f(x)\) represents the height of these rectangles, and \(dx\) is the width. We sum the areas of all of these tiny rectangles (\(f(x)\cdot dx\)) from \(x=a\) to \(x=b\). Don't be confused by the notation here. The \(k\) and the \(n\) above and below the sum (\(\Sigma\)) do not mean the same thing as the \(a\) and the \(b\) above and below the integral.<br><br>
+        To summarize, enjoy this color-coded explanation of the notation:
+        $${\color{#c43119} \textrm{Area}} \; {\color{#0086b3} \approx} \, {\color{navy} \sum_{k=1}^{n}} {\color{purple} \Bigl(f\,\Bigl(a+{\color{blue} k}\cdot\frac{b-a}{n}\Bigr)\Bigr)}{\color{green} \Bigl(\frac{b-a}{n}\Bigr)}$$
+        To <span style="color: #0086b3; font-weight: bold;">approximate</span> the <span style="color: #c43119; font-weight: bold;">area under the curve</span>, multiply the <span style="color: purple; font-weight: bold;">height</span> by the <span style="color: green; font-weight: bold;">width</span> to get the area of a rectangle, and then <span style="color: navy; font-weight: bold;">sum the areas of</span> <span style="color: blue; font-weight: bold;">each</span> <span style="color: navy; font-weight: bold;">of the rectangles together.</span>
+      </p>
+    </div>
+    <script>
+      var coll = document.getElementsByClassName("collapsible");
+      var i;
+      for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function () {
+          this.classList.toggle("active");
+          var content = this.nextElementSibling;
+          if (content.style.maxHeight) {
+            content.style.maxHeight = null;
+          } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+          }
+        });
+      }
+    </script>
+  </div>
+  <footer>
+    <p>Copyright © 2023 Room 209 Enterprises</p>
+  </footer>
+</body>
+
+</html>
